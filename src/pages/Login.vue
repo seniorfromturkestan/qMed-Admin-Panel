@@ -1,43 +1,78 @@
 <template>
   <div class="login-page">
     <div class="login-card">
-      <h1 class="login-title">qMed Admin</h1>
-      <p class="login-subtitle">Вход в админ-панель</p>
+      <!-- Левая часть: форма -->
+      <div class="login-left">
+        <div class="login-left__top">
+          <div class="login-logo">
+              <img src="../assets/img/qMed-logo.png" alt="">
+          </div>
 
-      <form class="login-form" @submit.prevent="onSubmit">
-        <div class="form-group">
-          <label for="username">Логин</label>
-          <input
-            id="username"
-            v-model="form.username"
-            type="text"
-            autocomplete="username"
-            placeholder="Введите логин"
-            required
-          />
+          <button type="button" class="lang-chip">
+            RU
+          </button>
         </div>
 
-        <div class="form-group">
-          <label for="password">Пароль</label>
-          <input
-            id="password"
-            v-model="form.password"
-            type="password"
-            autocomplete="current-password"
-            placeholder="Введите пароль"
-            required
-          />
+        <div class="login-left__content">
+          <h1 class="login-title">Вход</h1>
+
+          <form class="login-form" @submit.prevent="onSubmit">
+            <div class="form-group">
+              <label for="username">Логин</label>
+              <UiInput
+                id="username"
+                v-model="form.username"
+                placeholder="Ваш логин"
+                autocomplete="username"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="password">Пароль</label>
+              <UiInput
+                id="password"
+                v-model="form.password"
+                type="password"
+                placeholder="Ваш пароль"
+                autocomplete="current-password"
+              />
+            </div>
+
+            <div class="form-row">
+              <label class="remember-checkbox">
+                <input
+                  v-model="rememberMe"
+                  type="checkbox"
+                />
+                <span>Запомнить меня</span>
+              </label>
+            </div>
+
+            <p v-if="error" class="error-text">
+              {{ error }}
+            </p>
+
+            <UiButton
+              class="login-button"
+              type="submit"
+              :disabled="loading"
+            >
+              <span v-if="!loading">Войти</span>
+              <span v-else>Входим...</span>
+            </UiButton>
+          </form>
         </div>
+      </div>
 
-        <p v-if="error" class="error-text">
-          {{ error }}
-        </p>
-
-        <button class="login-button" type="submit" :disabled="loading">
-          <span v-if="!loading">Войти</span>
-          <span v-else>Входим...</span>
-        </button>
-      </form>
+      <!-- Правая часть: картинка -->
+      <div class="login-right">
+        <!-- Здесь поставь свою картинку врача/медсестры -->
+        <img
+          src="../assets/img/login-nurse.png"
+          alt="Медицинский работник"
+          class="login-image"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -46,6 +81,8 @@
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import AuthApi from '../api/models/AuthApi'
+import UiInput from '../components/ui/UiInput.vue'
+import UiButton from '../components/ui/UiButton.vue'
 
 const router = useRouter()
 
@@ -53,6 +90,8 @@ const form = reactive({
   username: '',
   password: '',
 })
+
+const rememberMe = ref(false)
 
 const loading = ref(false)
 const error = ref('')
@@ -65,9 +104,6 @@ const onSubmit = async () => {
 
   try {
     const response = await AuthApi.login(form.username, form.password)
-
-    // !!! ВАЖНО: проверь реальный ответ /login
-    // Здесь предполагаем, что токен приходит в response.data.token
     const token = response?.token || response?.data?.token
 
     if (!token) {
@@ -77,7 +113,6 @@ const onSubmit = async () => {
     localStorage.setItem('accessToken', token)
     localStorage.setItem('user_id', response?.user_id || '')
 
-    // После логина перенаправляем на главную админку (путь подстрой под свой роутер)
     router.push({ path: '/main' })
   } catch (e) {
     console.error(e)
@@ -97,26 +132,69 @@ const onSubmit = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px;
+  padding: 32px 16px;
 }
 
 .login-card {
   width: 100%;
-  max-width: 420px;
-  border-radius: 30px;
-  padding: 32px 28px;
-  box-shadow: 0 1px 30px rgba(0, 0, 0, 0.1);
+  max-width: 900px;
+  background: #ffffff;
+  border-radius: 25px;
+  overflow: hidden;
+  display: flex;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+}
+
+.login-left {
+  flex: 1 1 50%;
+  padding: 36px 40px;
+  display: flex;
+  flex-direction: column;
+}
+
+.login-left__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+
+.login-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.login-logo img {
+  height: 70px;
+}
+
+
+.lang-chip {
+  border: none;
+  border-radius: 10px;
+  padding: 6px 16px; 
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  background: #1c59f8;
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(28, 89, 248, 0.3);
+}
+
+.login-left__content {
+  flex: 1;
+  max-width: 360px;
+  margin-top: 30px;
+  margin-left: 30px;
 }
 
 .login-title {
-  font-size: 24px;
+  text-align: center;
+  font-size: 45px;
   font-weight: 700;
-  margin: 0 0 4px;
-}
-
-.login-subtitle {
   margin: 0 0 24px;
-  font-size: 14px;
+  color: #111827;
 }
 
 .login-form {
@@ -133,31 +211,33 @@ const onSubmit = async () => {
 
 .form-group label {
   font-size: 13px;
+  color: #374151;
 }
 
-.form-group input {
-  border-radius: 20px;
-  padding: 10px 12px;
-  font-size: 14px;
-    border: 1px solid #d1d5db;
-  outline: none;
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease,
-    background 0.15s ease;
+.form-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
 }
 
-.form-group input::placeholder {
-  color: #6b7280;
+.remember-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #374151;
+  cursor: pointer;
 }
 
-.form-group input:focus {
-  border-color: #1C59F8;
-  box-shadow: 0 0 0 1px #1c5af87c;
+.remember-checkbox input {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
 }
 
 .error-text {
-  margin: 0;
+  margin: 4px 0 0;
   font-size: 13px;
   color: #f97373;
 }
@@ -165,38 +245,19 @@ const onSubmit = async () => {
 .login-button {
   margin-top: 8px;
   width: 100%;
-  border: none;
-  border-radius: 999px;
-  padding: 10px 16px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  background: linear-gradient(135deg, #1C59F8, #033ed3);
-  display: inline-flex;
-  color: #ffffff;
-  align-items: center;
-  justify-content: center;
-  transition:
-    transform 0.1s ease,
-    box-shadow 0.1s ease,
-    filter 0.1s ease,
-    opacity 0.1s ease;
 }
 
-.login-button:hover:not(:disabled) {
-  transform: translateY(-1px);
-    box-shadow: 0 12px 24px #1c5af87c;
-  filter: brightness(1.05);
+.login-right {
+  flex: 1 1 50%;
+  position: relative;
 }
 
-.login-button:active:not(:disabled) {
-  transform: translateY(0);
-    box-shadow: 0 8px 16px #1C59F8;
+.login-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 25px;
+  object-fit: cover;
 }
 
-.login-button:disabled {
-  opacity: 0.7;
-  cursor: default;
-  box-shadow: none;
-}
+
 </style>

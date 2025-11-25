@@ -15,11 +15,13 @@
         <UiInput
           v-model="searchQuery"
           placeholder="Поиск"
+          class="polyclinic-detail__input"
         />
         <UiButton
           type="button"
           variant="secondary"
           @click="onSearch"
+          class="polyclinic-detail__search-btn"
         >
           Искать
         </UiButton>
@@ -128,8 +130,6 @@
     <div class="polyclinic-detail__content">
       <!-- Отделения -->
       <div v-if="activeTab === 'departments'">
-        <h2 class="section-title">Отделения поликлиники</h2>
-
         <div v-if="loadingDepartments" class="section-empty">Загрузка...</div>
         <div v-else-if="!departments.length" class="section-empty">
           Отделения не найдены
@@ -162,14 +162,14 @@
                 class="icon-btn"
                 @click="onEditDepartment(dept)"
               >
-                ✏️
+                <img src="../assets/img/edit.png" alt="">
               </button>
               <button
                 type="button"
                 class="icon-btn"
                 @click="onDeleteDepartment(dept)"
               >
-                🗑
+                <img src="../assets/img/delete.png" alt="">
               </button>
             </div>
           </div>
@@ -178,7 +178,6 @@
 
       <!-- Сотрудники -->
       <div v-else-if="activeTab === 'employees'">
-        <h2 class="section-title">Сотрудники поликлиники</h2>
 
         <div v-if="loadingEmployees" class="section-empty">Загрузка...</div>
         <div v-else-if="!employees.length" class="section-empty">
@@ -235,8 +234,6 @@
 
       <!-- Пациенты -->
       <div v-else-if="activeTab === 'patients'">
-        <h2 class="section-title">Пациенты поликлиники</h2>
-
         <div v-if="loadingPatients" class="section-empty">Загрузка...</div>
         <div v-else-if="!patients.length" class="section-empty">
           Пациенты не найдены
@@ -1714,7 +1711,6 @@ watch(
   background: #ffffff;
   border-radius: 16px;
   border: 1px solid #e5e7eb;
-  padding: 16px 20px 20px;
 }
 
 .section-title {
@@ -1723,17 +1719,15 @@ watch(
   margin-bottom: 12px;
 }
 
-/* Таблички */
-.section-table {
-  margin-top: 4px;
-}
+
 
 .section-table__header {
   display: grid;
   grid-template-columns: 3fr 2fr;
-  padding: 10px 12px;
+  border-radius: 15px 15px 0 0;
+  padding:16px;
   background: #eef4ff;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: #111827;
 }
@@ -1744,6 +1738,8 @@ watch(
   padding: 10px 12px;
   font-size: 14px;
   border-top: 1px solid #f3f4f6;
+  margin-left: 10px;
+  cursor: pointer;
 }
 
 .col {
@@ -1796,9 +1792,14 @@ watch(
   gap: 4px;
 }
 
+.polyclinic-detail__input {
+  width: 700px;
+}
+
+
 .icon-btn {
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   border-radius: 999px;
   border: none;
   background: transparent;
@@ -1813,6 +1814,9 @@ watch(
 
 .icon-btn:hover {
   background: rgba(37, 99, 235, 0.08);
+}
+.icon-btn img {
+  width: 20px;
 }
 
 /* модалки для сотрудников (повторяем стили из Main.vue) */
@@ -1889,8 +1893,13 @@ watch(
   align-items: center;
   gap: 8px;
   flex: 1 1 auto;
-  max-width: 480px;
+ 
 }
+.polyclinic-detail__search-btn {
+  border:2px solid #2563eb;
+  color:#2563eb;
+}
+
 .polyclinic-detail__select {
   border-radius: 999px;
   border: 1px solid #e5e7eb;

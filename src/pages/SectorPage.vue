@@ -33,9 +33,9 @@
         </div>
   
         <!-- пока без логики создания пациента, просто кнопка как в макете -->
-        <UiButton type="button" variant="primary">
+        <!-- <UiButton type="button" variant="primary">
           Добавить пациента
-        </UiButton>
+        </UiButton> -->
       </div>
   
       <!-- Табы -->
@@ -98,14 +98,14 @@
               class="icon-btn"
               @click="onEditPatient(p)"
             >
-              ✏️
+              <img src="../assets/img/edit.png" alt="">
             </button>
             <button
               type="button"
               class="icon-btn"
               @click="onDeletePatient(p)"
             >
-              🗑
+              <img src="../assets/img/delete.png" alt="">
             </button>
           </div>
         </div>
@@ -835,7 +835,7 @@ const filteredMedStaff = computed(() => {
     border: none;
     background: transparent;
     padding: 8px 0;
-    font-size: 14px;
+    font-size: 16px;
     cursor: pointer;
     color: #6b7280;
     position: relative;
@@ -873,8 +873,9 @@ const filteredMedStaff = computed(() => {
   
   .card__header-row {
     background: #edf3ff;
-    font-weight: 500;
-    font-size: 14px;
+    font-weight: 600;
+    font-size: 15px;
+    padding: 18px;
   }
   
   .card__row {
@@ -926,6 +927,10 @@ const filteredMedStaff = computed(() => {
     font-size: 16px;
     padding: 4px;
   }
+  .icon-btn img {
+    width: 20px;
+    
+  }
   
   /* модалки */
   .modal-form {
@@ -948,6 +953,10 @@ const filteredMedStaff = computed(() => {
     justify-content: flex-end;
     gap: 8px;
     margin-top: 8px;
+  }
+  .search-box__btn{
+    border:2px solid #2563eb;
+    color:#2563eb;
   }
   
   .modal-delete__text {

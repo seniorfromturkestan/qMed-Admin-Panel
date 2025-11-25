@@ -2,32 +2,16 @@
   <header class="header">
     <div class="header__left">
       <div class="header__logo">
-        <span>qMed</span>
+       <img src="../assets/img/logo.png" alt="">
       </div>
       <span class="header__title">{{ headerTitle }}</span>
     </div>
 
     <div class="header__right">
-      <div class="header__lang">
-        <button
-          class="header__lang-btn"
-          :class="{ 'header__lang-btn--active': currentLang === 'ru' }"
-          @click="setLang('ru')"
-        >
-          RU
-        </button>
-        <button
-          class="header__lang-btn"
-          :class="{ 'header__lang-btn--active': currentLang === 'kz' }"
-          @click="setLang('kz')"
-        >
-          KZ
-        </button>
-      </div>
-
+  
       <div class="header__profile">
         <div class="header__profile-icon">
-          <span v-if="initials">{{ initials }}</span>
+          <img src="../assets/img/profile.png" alt="">
         </div>
         <span class="header__profile-name">
           {{ userName }}
@@ -53,41 +37,25 @@ const sectorTitle = ref('Участок')
 
 const headerTitle = computed(() => {
   if (route.name === 'PolyclinicPage') {
-    // если передаём название через query ?name=
     return route.query.name || polyclinicTitle.value || 'Поликлиника'
   } else if (route.name === 'DepartmentPage') {
-    // заголовок = имя отделения, подтянутое с бэка
     return departmentTitle.value || route.query.name || 'Отделение'
   } else if (route.name === 'SectorPage') {
-    // заголовок = участок (номер/адрес), подтянутый с бэка
     return sectorTitle.value || route.query.name || 'Участок'
   }
-  // дефолтный заголовок
   return 'Поликлиники'
 })
 
-// Текущий язык интерфейса (пока просто храним в localStorage)
 const currentLang = ref(localStorage.getItem('lang') || 'ru')
 
 const setLang = (lang) => {
   currentLang.value = lang
   localStorage.setItem('lang', lang)
-  // Здесь в будущем можно дернуть i18n.changeLanguage(lang)
 }
 
-// Имя/фамилия пользователя
 const userName = ref('')
 
-// Инициалы для круглой иконки
-const initials = computed(() => {
-  if (!userName.value) return ''
-  const parts = userName.value.split(' ').filter(Boolean)
-  if (parts.length === 0) return ''
-  if (parts.length === 1) return parts[0].charAt(0).toUpperCase()
-  return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase()
-})
 
-// Хелпер для обновления названий по маршруту
 const updateHeaderByRoute = async (toRoute = route) => {
   try {
     if (toRoute.name === 'DepartmentPage') {
@@ -122,7 +90,6 @@ onMounted(async () => {
     const res = await UsersApi.getUserById(userId)
     const data = res?.data || res
 
-    // Пробуем разные варианты кейсов/полей
     const lastName =
       data?.last_name ||
       data?.LastName ||
@@ -135,14 +102,12 @@ onMounted(async () => {
       data?.firstName ||
       ''
 
-    // Если хочешь строго только фамилию — используй lastName
     userName.value = lastName || [firstName, lastName].filter(Boolean).join(' ')
   } catch (e) {
     console.error('Ошибка при получении пользователя по id:', e)
   }
 })
 
-// Слежение за сменой маршрута для обновления заголовка
 watch(
   () => route.fullPath,
   () => {
@@ -169,18 +134,9 @@ watch(
   gap: 12px;
 }
 
-.header__logo {
-  width: 36px;
-  height: 36px;
-  border-radius: 999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: radial-gradient(circle at 30% 0, #1C59F8, #1C59F8);
-  font-weight: 700;
-  font-size: 10px;
-  color: #ffffff;
-  box-shadow: 0 4px 20px #1c5af890;
+.header__logo img {
+  height: 40px;
+  width: auto;
 }
 
 .header__title {
@@ -225,17 +181,10 @@ watch(
   gap: 10px;
 }
 
-.header__profile-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 999px;
-  background: #1C59F8;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 600;
-  color: #e5e7eb;
+.header__profile-icon img {
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 .header__profile-name {

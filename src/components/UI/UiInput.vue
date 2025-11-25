@@ -65,7 +65,7 @@
     display: inline-flex;
     align-items: center;
     background: #f9fafb;
-    border-radius: 999px;
+    border-radius: 12px;
     border: 1px solid #e5e7eb;
     padding: 0 14px;
     height: 40px;

@@ -14,7 +14,6 @@
     </div>
 
 
-    <!-- Поиск + кнопка "Добавить участок" -->
     <div class="department-page__controls">
       <div class="search-box">
         <UiInput
@@ -76,14 +75,14 @@
             class="icon-btn"
             @click="openEditSectorModal(sector)"
           >
-            ✏️
+            <img src="../assets/img/edit.png" alt="">
           </button>
           <button
             type="button"
             class="icon-btn"
             @click="openDeleteSectorModal(sector)"
           >
-            🗑
+            <img src="../assets/img/delete.png" alt="">
           </button>
         </div>
       </div>
@@ -477,7 +476,6 @@ onMounted(() => {
   padding: 24px;
 }
 
-/* верхняя полоса */
 .department-page__top {
   display: flex;
   align-items: center;
@@ -522,7 +520,6 @@ onMounted(() => {
   margin-bottom: 20px;
 }
 
-/* поиск + кнопка */
 .department-page__controls {
   display: flex;
   justify-content: space-between;
@@ -539,7 +536,7 @@ onMounted(() => {
 }
 
 .search-box__input {
-  flex: 1;
+  width: 500px;
 }
 
 .card {
@@ -559,8 +556,9 @@ onMounted(() => {
 
 .card__header-row {
   background: #edf3ff;
-  font-weight: 500;
-  font-size: 14px;
+  font-weight: 600;
+  font-size: 15px;
+  padding: 16px;
 }
 
 .card__row {
@@ -579,6 +577,11 @@ onMounted(() => {
   padding: 16px 20px;
   font-size: 14px;
   color: #6b7280;
+}
+.search-box__btn{
+  border:2px solid #2563eb;
+  color:#2563eb;
+
 }
 
 /* сетка для таблицы участков */
@@ -632,6 +635,10 @@ onMounted(() => {
   cursor: pointer;
   font-size: 16px;
   padding: 4px;
+}
+.icon-btn img{
+  width:20px;
+
 }
 
 .department-page__subtitle {
