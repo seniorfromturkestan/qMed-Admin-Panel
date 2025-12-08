@@ -7,10 +7,10 @@
           <div class="login-logo">
               <img src="../assets/img/qMed-logo.png" alt="">
           </div>
-
+<!-- 
           <button type="button" class="lang-chip">
             RU
-          </button>
+          </button> -->
         </div>
 
         <div class="login-left__content">

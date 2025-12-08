@@ -59,13 +59,14 @@ const userName = ref('')
 const updateHeaderByRoute = async (toRoute = route) => {
   try {
     if (toRoute.name === 'DepartmentPage') {
-      const id = toRoute.params.id
+      const id = toRoute.params.departmentId
       if (!id) return
       const res = await DepartmentApi.getDepartment(id)
       const data = res?.data || res
-      departmentTitle.value = data?.name || 'Отделение'
+      const department = data?.department || data
+      departmentTitle.value = department?.name || 'Отделение'
     } else if (toRoute.name === 'SectorPage') {
-      const id = toRoute.params.id
+      const id = toRoute.params.sectorId
       if (!id) return
       const res = await SectorApi.getSectorById(id)
       const data = res?.data || res

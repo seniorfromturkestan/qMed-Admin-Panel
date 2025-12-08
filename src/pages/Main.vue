@@ -291,7 +291,7 @@ const goToPolyclinic = (poly) => {
   // Переход на страницу конкретной поликлиники
   router.push({
     name: 'PolyclinicPage',
-    params: { id: poly.id },
+    params: { polyclinicId: poly.id },
     query: { name: poly.name || '' },
   })
 }

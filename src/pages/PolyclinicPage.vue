@@ -3,13 +3,12 @@
     <div class="polyclinic-detail__breadcrumbs">
       <RouterLink class="crumb" to="/main">Главная</RouterLink>
       <span class="crumb-sep">/</span>
-      <span class="crumb">
-       {{ polyclinicName }}
-      </span>
+      <RouterLink class="crumb" to="/main">
+        {{ polyclinicName }}
+      </RouterLink>
       <span class="crumb-sep">/</span>
     </div>
 
-    <!-- Верхняя панель: поиск + действия -->
     <div class="polyclinic-detail__top">
       <div class="polyclinic-detail__search">
         <UiInput
@@ -160,14 +159,14 @@
               <button
                 type="button"
                 class="icon-btn"
-                @click="onEditDepartment(dept)"
+                @click.stop="onEditDepartment(dept)"
               >
                 <img src="../assets/img/edit.png" alt="">
               </button>
               <button
                 type="button"
                 class="icon-btn"
-                @click="onDeleteDepartment(dept)"
+                @click.stop="onDeleteDepartment(dept)"
               >
                 <img src="../assets/img/delete.png" alt="">
               </button>
@@ -216,16 +215,18 @@
               <button
                 type="button"
                 class="icon-btn"
-                @click="onEditEmployee(emp)"
+                @click.stop="onEditEmployee(emp)"
               >
-                ✏️
+              <img src="../assets/img/edit.png" alt="">
+
               </button>
               <button
                 type="button"
                 class="icon-btn"
-                @click="onDeleteEmployee(emp)"
+                @click.stop="onDeleteEmployee(emp)"
               >
-                🗑
+                <img src="../assets/img/delete.png" alt="">
+
               </button>
             </div>
           </div>
@@ -267,16 +268,17 @@
                 <button
                     type="button"
                     class="icon-btn"
-                    @click="onEditPatient(p)"
+                    @click.stop="onEditPatient(p)"
                 >
-                    ✏️
+                    <img src="../assets/img/edit.png" alt="">
                 </button>
                 <button
                     type="button"
                     class="icon-btn"
-                    @click="onDeletePatient(p)"
+                    @click.stop="onDeletePatient(p)"
                 >
-                    🗑
+                    <img src="../assets/img/delete.png" alt="">
+
                 </button>
             </div>
           </div>
@@ -474,12 +476,16 @@
         </select>
       </label>
 
-      <label class="modal-form__field">
+      <label
+        v-if="showDepartmentSelect"
+        class="modal-form__field"
+      >
         <span>Отделение</span>
         <select
           v-model="employeeCreateForm.department_id"
           class="modal-select"
         >
+        <option value="">Выберите отделение</option>
           <option
             v-for="d in departments"
             :key="d.id || d.department_id"
@@ -490,13 +496,16 @@
         </select>
       </label>
 
-      <label class="modal-form__field">
+      <label
+        v-if="showSectorSelect"
+        class="modal-form__field"
+      >
         <span>Участки</span>
         <select
           v-model="employeeCreateForm.sector_ids"
           class="modal-select"
-          multiple
         >
+          <option value="">Выберите участок</option>
           <option
             v-for="s in departmentSectors"
             :key="s.sector_id || s.id"
@@ -615,12 +624,16 @@
       </select>
     </label>
 
-    <label class="modal-form__field">
+    <label
+      v-if="showDepartmentSelect"
+      class="modal-form__field"
+    >
       <span>Отделение</span>
       <select
         v-model="employeeCreateForm.department_id"
         class="modal-select"
       >
+      <option value="">Выберите отделение</option>
         <option
           v-for="d in departments"
           :key="d.id || d.department_id"
@@ -631,13 +644,16 @@
       </select>
     </label>
 
-    <label class="modal-form__field">
+    <label
+      v-if="showSectorSelect"
+      class="modal-form__field"
+    >
       <span>Участки</span>
       <select
         v-model="employeeCreateForm.sector_ids"
         class="modal-select"
-        multiple
       >
+        <option value="">Выберите участок</option>
         <option
           v-for="s in departmentSectors"
           :key="s.SectorID || s.sector_id || s.id"
@@ -731,7 +747,7 @@
       />
     </label>
     <label class="modal-form__field">
-      <span>ЖСН</span>
+      <span>ИИН</span>
       <UiInput
         v-model="patientEditForm.iin"
         type="text"
@@ -903,12 +919,21 @@ import UiModal from '../components/UI/UiModal.vue'
 import UiInput from '../components/UI/UiInput.vue'
 
 const route = useRoute()
-const polyclinicId = ref(route.params.id)
+const polyclinicId = ref(route.params.polyclinicId)
 const polyclinicName = ref('')
 
 
 const goToDepartment = (dept) => {
-  router.push({ name: 'DepartmentPage', params: { id: dept.department_id } })
+  const departmentId = dept.department_id || dept.id
+  if (!departmentId) return
+
+  router.push({
+    name: 'DepartmentPage',
+    params: {
+      polyclinicId: polyclinicId.value,
+      departmentId: departmentId,
+    },
+  })
 }
 
 const fetchPolyclinicInfo = async () => {
@@ -1000,7 +1025,8 @@ const employeeCreateForm = ref({
   birth_date: '',
   role_id: 3,
   department_id: null,
-  sector_ids: [],
+  // одно выбранное значение участка
+  sector_ids: '',
 })
 
 // загрузка пациентов из Excel (UI)
@@ -1043,6 +1069,35 @@ const rolesOptions = [
 
 // сектора выбранного отделения
 const departmentSectors = ref([])
+
+// Показывать ли селект "Отделение"
+const showDepartmentSelect = computed(() => {
+  const role = Number(employeeCreateForm.value.role_id)
+  // department_manager, sector_manager, med_staff
+  return role === 5 || role === 2 || role === 3
+})
+
+// Показывать ли селект "Участки"
+const showSectorSelect = computed(() => {
+  const role = Number(employeeCreateForm.value.role_id)
+  // только для sector_manager и med_staff
+  return role === 2 || role === 3
+})
+
+// При смене роли очищаем отделение/участки, если они больше не нужны
+watch(
+  () => employeeCreateForm.value.role_id,
+  () => {
+    const role = Number(employeeCreateForm.value.role_id)
+
+    if (!(role === 5 || role === 2 || role === 3)) {
+      employeeCreateForm.value.department_id = null
+      employeeCreateForm.value.sector_ids = ''
+    } else if (!(role === 2 || role === 3)) {
+      employeeCreateForm.value.sector_ids = ''
+    }
+  },
+)
 
 const fetchDepartmentSectors = async (departmentId) => {
   if (!departmentId) {
@@ -1245,7 +1300,7 @@ const openCreateEmployeeModal = async () => {
     birth_date: '',
     role_id: 3,
     department_id: defaultDeptId,
-    sector_ids: [],
+    sector_ids: '',
   }
 
   if (defaultDeptId) {
@@ -1280,8 +1335,11 @@ const saveCreatedEmployee = async () => {
         : null,
     }
 
-    if (employeeCreateForm.value.sector_ids && employeeCreateForm.value.sector_ids.length) {
-      payload.sector_ids = employeeCreateForm.value.sector_ids.map((id) => Number(id))
+    const sectorValue = employeeCreateForm.value.sector_ids
+    if (Array.isArray(sectorValue) && sectorValue.length) {
+      payload.sector_ids = sectorValue.map((id) => Number(id))
+    } else if (sectorValue) {
+      payload.sector_ids = [Number(sectorValue)]
     }
 
     await UsersApi.createEmployee(payload)
@@ -1532,7 +1590,7 @@ const onEditEmployee = (emp) => {
     birth_date: emp.birth_date || emp.BirthDate || '',
     role_id: roleId,
     department_id: deptId,
-    sector_ids: sectorIds,
+    sector_ids: sectorIds[0] || '',
   }
 
   if (deptId) {
@@ -1556,7 +1614,7 @@ const closeEditEmployeeModal = () => {
     birth_date: '',
     role_id: 3,
     department_id: null,
-    sector_ids: [],
+    sector_ids: '',
   }
 }
 
@@ -1584,13 +1642,11 @@ const saveEmployee = async () => {
         : null,
     }
 
-    if (
-      employeeCreateForm.value.sector_ids &&
-      employeeCreateForm.value.sector_ids.length
-    ) {
-      payload.sector_ids = employeeCreateForm.value.sector_ids.map((val) =>
-        Number(val),
-      )
+    const sectorValue = employeeCreateForm.value.sector_ids
+    if (Array.isArray(sectorValue) && sectorValue.length) {
+      payload.sector_ids = sectorValue.map((val) => Number(val))
+    } else if (sectorValue) {
+      payload.sector_ids = [Number(sectorValue)]
     }
 
     await UsersApi.updateUser(id, payload)
@@ -1657,7 +1713,7 @@ onMounted(() => {
 
 // если id в роуте поменяется — обновим данные
 watch(
-  () => route.params.id,
+  () => route.params.polyclinicId,
   (newId) => {
     polyclinicId.value = newId
     departments.value = []
@@ -1690,10 +1746,16 @@ watch(
   align-items: center;
   gap: 4px;
   font-size: 13px;
-  color: #6b7280;
+  color: #9ca3af;
   margin-bottom: 12px;
 }
 
+.crumb{
+  color: #9ca3af;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
 .crumb-sep {
   color: #9ca3af;
 }
@@ -1740,6 +1802,10 @@ watch(
   border-top: 1px solid #f3f4f6;
   margin-left: 10px;
   cursor: pointer;
+}
+.section-table__row:hover {
+  background: #f9fafb;
+  
 }
 
 .col {

@@ -41,17 +41,17 @@ const router = createRouter({
             component: MainPage, // ← это твой Main.vue
           },
           {
-            path: 'polyclinic/:id',
+            path: 'polyclinic/:polyclinicId',
             name: 'PolyclinicPage',
             component: PolyclinicPage,
           },
           {
-            path: 'polyclinic/:id/department/:id',
+            path: 'polyclinic/:polyclinicId/department/:departmentId',
             name: 'DepartmentPage',
             component: DepartmentPage,
           },
           {
-            path: 'department/:id/sector/:id',
+            path: 'polyclinic/:polyclinicId/department/:departmentId/sector/:sectorId',
             name: 'SectorPage',
             component: SectorPage,
           }

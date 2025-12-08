@@ -3,7 +3,9 @@ import axios from 'axios'
 const instance = axios.create({
   // baseURL: 'https://qmedback.mooo.com',
   // baseURL: 'https://qmedbackprod.chickenkiller.com',
-  baseURL: '/api',
+  baseURL: 'https://qmedback.qbots.kz',
+
+  // baseURL: '/api',
   headers: {
     Accept: 'application/json',
   },

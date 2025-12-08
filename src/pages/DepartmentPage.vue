@@ -5,7 +5,12 @@
       <div class="breadcrumbs">
         <RouterLink to="/main" class="breadcrumbs__item">Главная</RouterLink>
         <span class="breadcrumbs__sep">/</span>
-        <span class="breadcrumbs__item">{{ polyclinicName }}</span>
+        <span
+          class="breadcrumbs__item breadcrumbs__item--link"
+          @click="goBack"
+        >
+          {{ polyclinicName }}
+        </span>
         <span class="breadcrumbs__sep">/</span>
         <span class="breadcrumbs__item breadcrumbs__item--current">
           {{ department?.name }}
@@ -251,9 +256,9 @@ import PolyclinicApi from '../api/models/PolyclinicApi'
 const route = useRoute()
 const router = useRouter()
 
-const departmentId = computed(() => Number(route.params.id))
+const departmentId = computed(() => Number(route.params.departmentId))
 const polyclinicName = ref('')
-const polyclinicId = ref(route.params.id)
+const polyclinicId = computed(() => Number(route.params.polyclinicId))
 
 
 
@@ -458,9 +463,16 @@ const confirmDeleteSector = async () => {
 }
 
 const goToSector = (sector) => {
-  const id = sector.sector_id || sector.SectorID || sector.id
+  const id = sector.sector_id
   if (!id) return
-  router.push({ name: 'SectorPage', params: { id } })
+  router.push({ 
+    name: 'SectorPage',
+    params: {
+      polyclinicId: polyclinicId.value,
+      departmentId: departmentId.value,
+      sectorId: id,
+    },
+   })
 }
 
 onMounted(() => {
@@ -497,16 +509,22 @@ onMounted(() => {
   align-items: center;
   gap: 4px;
   font-size: 13px;
-  color: #6b7280;
+  color: #9ca3af;
 }
 
 .breadcrumbs__item {
+  cursor: pointer;
   text-decoration: none;
-  color: #6b7280;
+  color: #9ca3af;
 }
 
+.breadcrumbs__item--link {
+  cursor: pointer;
+}
+
+
 .breadcrumbs__item--current {
-  color: #111827;
+  color: #9ca3af;
   font-weight: 500;
 }
 
@@ -613,12 +631,9 @@ onMounted(() => {
 
 .col--name-link {
   cursor: pointer;
-  color: #2563eb;
 }
 
-.col--name-link:hover {
-  text-decoration: underline;
-}
+
 
 .col--count {
   justify-content: flex-start;
