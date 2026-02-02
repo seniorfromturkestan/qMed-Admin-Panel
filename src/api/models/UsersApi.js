@@ -31,6 +31,10 @@ export default class UsersApi {
     return ApiEndpoint.makeRequest('GET', `/admin/users/${id}`)
   }
 
+  static deleteUser(id) {
+    return ApiEndpoint.makeRequest('DELETE', `/admin/users/${id}`)
+  }
+
   // Создание юзера (ручное)
   static createUser(data) {
     return ApiEndpoint.makeRequest('POST', '/admin/users', data)

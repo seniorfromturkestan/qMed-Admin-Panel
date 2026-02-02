@@ -184,11 +184,13 @@
         </div>
         <div v-else class="section-table">
           <div class="section-table__header section-table__header--employees">
-            <div class="col col--name">Фамилия Имя</div>
+            <div class="col col--name">ФИО</div>
             <div class="col col--role">Роль</div>
             <div class="col col--dept">Отделение</div>
             <div class="col col--sector">Участок</div>
             <div class="col col--phone">Телефон</div>
+            <div class="col col--sector">Логин</div>
+            <div class="col col--sector">Пароль</div>
             <div class="col col--actions">Действия</div>
           </div>
           <div
@@ -211,6 +213,13 @@
             <div class="col col--phone">
               {{ emp.PhoneNumber || emp.phone_number || '' }}
             </div>
+            <div class="col col--sector">
+              {{ emp.username|| '' }}
+            </div>
+            <div class="col col--sector">
+              {{ emp.password || '' }}
+            </div>
+            
             <div class="col col--actions">
               <button
                 type="button"
@@ -994,6 +1003,8 @@ const patientEditForm = ref({
   phone_number: '',
   birth_date: '',
   gender: 'male',
+  relative_phone_number: '',
+  language: '',
   address: '',
   mail: '',
   height_cm: null,
@@ -1473,7 +1484,7 @@ const getRoleName = (user) => {
   const map = {
     1: 'Менеджер',
     2: 'Врач',
-    3: 'Медсестра',
+    3: 'Мед. персонал',
     5: 'Зав. отделением',
   }
 
@@ -1510,6 +1521,8 @@ const onEditPatient = async (p) => {
       gender: data.gender || data.Gender || 'male',
       address: data.address || data.Address || '',
       mail: data.mail || data.Mail || '',
+      relative_phone_number: data.relative_phone_number || data.RelativePhoneNumber || '',
+      language: data.language || data.Language || '',
       height_cm: data.height_cm ?? data.HeightCM ?? null,
       weight_kg: data.weight_kg ?? data.WeightKG ?? null,
       blood_pressure: data.blood_pressure || data.BloodPressure || '',
@@ -1537,21 +1550,51 @@ const savePatient = async () => {
   if (!id) return
 
   try {
+    const existingDepartments =
+      editingPatient.value?.departments || editingPatient.value?.Departments || []
+    const existingSectors =
+      editingPatient.value?.sectors || editingPatient.value?.Sectors || []
+    const existingPolyclinics =
+      editingPatient.value?.polyclinics || editingPatient.value?.Polyclinics || []
+    const existingDiseases =
+      editingPatient.value?.diseases || editingPatient.value?.Diseases || []
+
     const payload = {
-      last_name: patientEditForm.value.last_name,
-      first_name: patientEditForm.value.first_name,
-      middle_name: patientEditForm.value.middle_name,
-      iin: patientEditForm.value.iin,
-      phone_number: patientEditForm.value.phone_number,
-      birth_date: patientEditForm.value.birth_date,
-      gender: patientEditForm.value.gender,
-      address: patientEditForm.value.address,
-      mail: patientEditForm.value.mail,
-      height_cm: patientEditForm.value.height_cm,
-      weight_kg: patientEditForm.value.weight_kg,
-      blood_pressure: patientEditForm.value.blood_pressure,
-      sugar_level: patientEditForm.value.sugar_level,
-      heart_rate: patientEditForm.value.heart_rate,
+      address: patientEditForm.value.address || '',
+      birth_dt: patientEditForm.value.birth_date || '',
+      department_ids: Array.isArray(existingDepartments)
+        ? existingDepartments
+            .map((d) => Number(d.department_id || d.DepartmentID || d.id))
+            .filter((n) => Number.isFinite(n))
+        : [],
+      disease_ids: Array.isArray(existingDiseases)
+        ? existingDiseases
+            .map((d) => Number(d.disease_id || d.DiseaseID || d.id))
+            .filter((n) => Number.isFinite(n))
+        : [],
+      first_name: patientEditForm.value.first_name || '',
+      gender: patientEditForm.value.gender || '',
+      iin: patientEditForm.value.iin || '',
+      language: patientEditForm.value.language || '',
+      last_name: patientEditForm.value.last_name || '',
+      mail: patientEditForm.value.mail || '',
+      med_staff_id: Number(
+        editingPatient.value?.med_staff_id || editingPatient.value?.MedStaffID || 0,
+      ),
+      middle_name: patientEditForm.value.middle_name || '',
+      phone_number: patientEditForm.value.phone_number || '',
+      polyclinic_ids: Array.isArray(existingPolyclinics) && existingPolyclinics.length
+        ? existingPolyclinics
+            .map((p) => Number(p.polyclinic_id || p.PolyclinicID || p.id))
+            .filter((n) => Number.isFinite(n))
+        : (polyclinicId.value ? [Number(polyclinicId.value)] : []),
+      relative_phone_number: patientEditForm.value.relative_phone_number || '',
+      roles: [4],
+      sector_ids: Array.isArray(existingSectors)
+        ? existingSectors
+            .map((s) => Number(s.sector_id || s.SectorID || s.id))
+            .filter((n) => Number.isFinite(n))
+        : [],
     }
 
     await UsersApi.updateUser(id, payload)
@@ -1627,19 +1670,28 @@ const saveEmployee = async () => {
   if (!id) return
 
   try {
+    const roleId = Number(employeeCreateForm.value.role_id)
+
     const payload = {
-      first_name: employeeCreateForm.value.first_name,
-      last_name: employeeCreateForm.value.last_name,
-      middle_name: employeeCreateForm.value.middle_name,
-      phone_number: employeeCreateForm.value.phone_number,
-      gender: employeeCreateForm.value.gender,
-      address: employeeCreateForm.value.address,
-      mail: employeeCreateForm.value.mail,
-      birth_date: employeeCreateForm.value.birth_date,
-      role_id: Number(employeeCreateForm.value.role_id),
-      department_id: employeeCreateForm.value.department_id
-        ? Number(employeeCreateForm.value.department_id)
-        : null,
+      address: employeeCreateForm.value.address || '',
+      birth_dt: employeeCreateForm.value.birth_date || '',
+      department_ids: employeeCreateForm.value.department_id
+        ? [Number(employeeCreateForm.value.department_id)]
+        : [],
+      disease_ids: [],
+      first_name: employeeCreateForm.value.first_name || '',
+      gender: employeeCreateForm.value.gender || '',
+      iin: '',
+      language: employeeCreateForm.value.language || '',
+      last_name: employeeCreateForm.value.last_name || '',
+      mail: employeeCreateForm.value.mail || '',
+      med_staff_id: 0,
+      middle_name: employeeCreateForm.value.middle_name || '',
+      phone_number: employeeCreateForm.value.phone_number || '',
+      polyclinic_ids: polyclinicId.value ? [Number(polyclinicId.value)] : [],
+      relative_phone_number: '',
+      roles: [roleId],
+      sector_ids: [],
     }
 
     const sectorValue = employeeCreateForm.value.sector_ids
@@ -1831,7 +1883,7 @@ watch(
 .section-table__header--employees,
 .section-table__row--employees {
   display: grid;
-  grid-template-columns: 2.4fr 1.4fr 2fr 2fr 2fr 1.4fr;
+  grid-template-columns: 2.4fr 1.4fr 2fr 2fr 2fr 1.4fr 2fr 2fr;
   column-gap: 8px;
 }
 
@@ -2008,8 +2060,6 @@ watch(
   font-size: 14px;
   background: #ffffff;
 }
-</style>
-<style scoped>
 .polyclinic-detail__error {
   font-size: 12px;
   color: #ef4444;

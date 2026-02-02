@@ -14,7 +14,7 @@
         </div>
 
         <div class="login-left__content">
-          <h1 class="login-title">Вход</h1>
+          <h1 class="login-title">вход в админ-панель</h1>
 
           <form class="login-form" @submit.prevent="onSubmit">
             <div class="form-group">
@@ -117,8 +117,6 @@ const onSubmit = async () => {
   } catch (e) {
     console.error(e)
     error.value =
-      e?.response?.data?.message ||
-      e?.message ||
       'Ошибка входа. Проверьте логин и пароль.'
   } finally {
     loading.value = false
@@ -166,7 +164,7 @@ const onSubmit = async () => {
 }
 
 .login-logo img {
-  height: 70px;
+  height: 60px;
 }
 
 
@@ -191,7 +189,7 @@ const onSubmit = async () => {
 
 .login-title {
   text-align: center;
-  font-size: 45px;
+  font-size: 28px;
   font-weight: 700;
   margin: 0 0 24px;
   color: #111827;
