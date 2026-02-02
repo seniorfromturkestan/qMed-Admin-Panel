@@ -16,7 +16,7 @@
   defineProps({
     variant: {
       type: String,
-      default: 'primary', // primary | secondary | ghost (можно расширять)
+      default: 'primary', 
     },
     type: {
       type: String,
@@ -26,6 +26,10 @@
       type: Boolean,
       default: false,
     },
+    width: {
+      type: String,
+      default: null,
+    },
   })
   </script>
   
@@ -34,7 +38,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 999px;
+    border-radius: 12px;
     padding: 0 20px;
     height: 40px;
     font-size: 14px;

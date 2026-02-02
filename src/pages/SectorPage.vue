@@ -5,9 +5,15 @@
         <div class="breadcrumbs">
           <RouterLink to="/main" class="breadcrumbs__item">Главная</RouterLink>
           <span class="breadcrumbs__sep">/</span>
-          <span class="breadcrumbs__item">Отделения</span>
+          <span class="breadcrumbs__item">
+            {{ polyclinic?.name || 'Поликлиника' }}
+          </span>
           <span class="breadcrumbs__sep">/</span>
-          <span class="breadcrumbs__item breadcrumbs__item--current">
+          <span class="breadcrumbs__item" @click="goBack">
+            {{ department?.name || 'Отделение' }}
+          </span>
+          <span class="breadcrumbs__sep">/</span>
+          <span class="breadcrumbs__item">
             Участок {{ sector?.number ?? sectorId }}
           </span>
         </div>
@@ -33,9 +39,9 @@
         </div>
   
         <!-- пока без логики создания пациента, просто кнопка как в макете -->
-        <UiButton type="button" variant="primary">
+        <!-- <UiButton type="button" variant="primary">
           Добавить пациента
-        </UiButton>
+        </UiButton> -->
       </div>
   
       <!-- Табы -->
@@ -98,14 +104,14 @@
               class="icon-btn"
               @click="onEditPatient(p)"
             >
-              ✏️
+              <img src="../assets/img/edit.png" alt="">
             </button>
             <button
               type="button"
               class="icon-btn"
               @click="onDeletePatient(p)"
             >
-              🗑
+              <img src="../assets/img/delete.png" alt="">
             </button>
           </div>
         </div>
@@ -147,14 +153,15 @@
               class="icon-btn"
               @click="onEditEmployee(emp)"
             >
-              ✏️
+              <img src="../assets/img/edit.png" alt="">
             </button>
             <button
               type="button"
               class="icon-btn"
               @click="onDeleteEmployee(emp)"
             >
-              🗑
+              <img src="../assets/img/delete.png" alt="">
+
             </button>
           </div>
         </div>
@@ -440,23 +447,45 @@
   
   import SectorApi from '../api/models/SectorApi'
   import UsersApi from '../api/models/UsersApi'
+  import DepartmentApi from '../api/models/DepartmentApi'
+  import PolyclinicApi from '../api/models/PolyclinicApi'
 
   
   const route = useRoute()
   const router = useRouter()
   
-  const sectorId = computed(() => Number(route.params.id))
+  const departmentId = computed(() => Number(route.params.departmentId))
+  const polyclinicId = computed(() => Number(route.params.polyclinicId))
+  const sectorId = computed(() => Number(route.params.sectorId))
   
-const sector = ref(null)
-const managers = ref([])
-const medStaff = ref([])
-const patients = ref([])
+  const sector = ref(null)
+  const department = ref(null)
+  const polyclinic = ref(null)
+  const managers = ref([])
+  const medStaff = ref([])
+  const patients = ref([])
+  const fetchDepartmentAndPolyclinic = async () => {
+    try {
+      if (departmentId.value) {
+        const resDept = await DepartmentApi.getDepartment(departmentId.value)
+        const dataDept = resDept?.data || resDept
+        department.value = dataDept.department || dataDept
+      }
+      if (polyclinicId.value) {
+        const resPoly = await PolyclinicApi.getPolyclinicById(polyclinicId.value)
+        const dataPoly = resPoly?.data || resPoly
+        polyclinic.value = dataPoly.polyclinic || dataPoly
+      }
+    } catch (e) {
+      console.error('Ошибка при получении поликлиники/отделения для участка:', e)
+    }
+  }
 
-const allEmployees = computed(() => {
-  const mgrs = Array.isArray(managers.value) ? managers.value : []
-  const staff = Array.isArray(medStaff.value) ? medStaff.value : []
-  return [...mgrs, ...staff]
-})
+  const allEmployees = computed(() => {
+    const mgrs = Array.isArray(managers.value) ? managers.value : []
+    const staff = Array.isArray(medStaff.value) ? medStaff.value : []
+    return [...mgrs, ...staff]
+  })
   
   const loading = ref(false)
   const searchQuery = ref('')
@@ -744,6 +773,7 @@ const filteredMedStaff = computed(() => {
   
   onMounted(() => {
     fetchSector()
+    fetchDepartmentAndPolyclinic()
   })
   </script>
   
@@ -779,12 +809,13 @@ const filteredMedStaff = computed(() => {
   
   .breadcrumbs__item {
     text-decoration: none;
-    color: #6b7280;
+    color: #9ca3af;
+    cursor: pointer;
   }
   
   .breadcrumbs__item--current {
-    color: #111827;
-    font-weight: 500;
+    color: #9ca3af;
+  
   }
   
   .breadcrumbs__sep {
@@ -835,7 +866,7 @@ const filteredMedStaff = computed(() => {
     border: none;
     background: transparent;
     padding: 8px 0;
-    font-size: 14px;
+    font-size: 16px;
     cursor: pointer;
     color: #6b7280;
     position: relative;
@@ -873,8 +904,9 @@ const filteredMedStaff = computed(() => {
   
   .card__header-row {
     background: #edf3ff;
-    font-weight: 500;
-    font-size: 14px;
+    font-weight: 600;
+    font-size: 15px;
+    padding: 18px;
   }
   
   .card__row {
@@ -926,6 +958,10 @@ const filteredMedStaff = computed(() => {
     font-size: 16px;
     padding: 4px;
   }
+  .icon-btn img {
+    width: 20px;
+    
+  }
   
   /* модалки */
   .modal-form {
@@ -948,6 +984,10 @@ const filteredMedStaff = computed(() => {
     justify-content: flex-end;
     gap: 8px;
     margin-top: 8px;
+  }
+  .search-box__btn{
+    border:2px solid #2563eb;
+    color:#2563eb;
   }
   
   .modal-delete__text {

@@ -20,7 +20,6 @@
         </UiButton>
       </div>
   
-      <!-- Таблица -->
       <div class="polyclinic-table">
         <div class="polyclinic-table__header">
           <div class="col col--id">ID</div>
@@ -65,14 +64,14 @@
               type="button"
               @click.stop="onEdit(poly)"
             >
-              ✏️
+              <img src="../assets/img/edit.png" alt="">
             </button>
             <button
               class="icon-btn"
               type="button"
               @click.stop="onDelete(poly)"
             >
-              🗑
+              <img src="../assets/img/delete.png" alt="">
             </button>
           </div>
         </div>
@@ -292,7 +291,7 @@ const goToPolyclinic = (poly) => {
   // Переход на страницу конкретной поликлиники
   router.push({
     name: 'PolyclinicPage',
-    params: { id: poly.id },
+    params: { polyclinicId: poly.id },
     query: { name: poly.name || '' },
   })
 }
@@ -345,7 +344,6 @@ const onSubmit = async () => {
     padding: 24px;
   }
   
-  /* Верхняя панель */
   .polyclinic-page__top {
     display: flex;
     justify-content: space-between;
@@ -362,11 +360,10 @@ const onSubmit = async () => {
   
   .search-input {
     position: relative;
-    width: 360px;
-    max-width: 100%;
+    width: 100%;
+    min-width: 800px;
   }
   
-  /* Таблица */
   .polyclinic-table {
     margin-top: 8px;
     background: #ffffff;
@@ -380,9 +377,9 @@ const onSubmit = async () => {
     display: grid;
     grid-template-columns: 0.7fr 3fr 2fr 1.5fr;
     align-items: center;
-    padding: 12px 24px;
+    padding: 16px;
     background: #eef4ff;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
     color: #111827;
   }
@@ -433,10 +430,9 @@ const onSubmit = async () => {
     color: #000000;
   }
   
-  /* Кнопки-иконки */
   .icon-btn {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: 999px;
     border: none;
     display: inline-flex;
@@ -453,8 +449,10 @@ const onSubmit = async () => {
   .icon-btn:hover {
     background: rgba(37, 99, 235, 0.08);
   }
-  
-  /* Формочка внутри модалки */
+  .icon-btn img {
+    width: 20px;
+  }
+
   .modal-form {
     display: flex;
     flex-direction: column;
@@ -494,5 +492,9 @@ const onSubmit = async () => {
     display: flex;
     justify-content: flex-end;
     gap: 8px;
+  }
+  .search-btn {
+    border: 2px solid #2563eb;
+    color:#2563eb
   }
   </style>

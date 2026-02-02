@@ -5,7 +5,12 @@
       <div class="breadcrumbs">
         <RouterLink to="/main" class="breadcrumbs__item">Главная</RouterLink>
         <span class="breadcrumbs__sep">/</span>
-        <span class="breadcrumbs__item">{{ polyclinicName }}</span>
+        <span
+          class="breadcrumbs__item breadcrumbs__item--link"
+          @click="goBack"
+        >
+          {{ polyclinicName }}
+        </span>
         <span class="breadcrumbs__sep">/</span>
         <span class="breadcrumbs__item breadcrumbs__item--current">
           {{ department?.name }}
@@ -14,7 +19,6 @@
     </div>
 
 
-    <!-- Поиск + кнопка "Добавить участок" -->
     <div class="department-page__controls">
       <div class="search-box">
         <UiInput
@@ -76,14 +80,14 @@
             class="icon-btn"
             @click="openEditSectorModal(sector)"
           >
-            ✏️
+            <img src="../assets/img/edit.png" alt="">
           </button>
           <button
             type="button"
             class="icon-btn"
             @click="openDeleteSectorModal(sector)"
           >
-            🗑
+            <img src="../assets/img/delete.png" alt="">
           </button>
         </div>
       </div>
@@ -252,9 +256,9 @@ import PolyclinicApi from '../api/models/PolyclinicApi'
 const route = useRoute()
 const router = useRouter()
 
-const departmentId = computed(() => Number(route.params.id))
+const departmentId = computed(() => Number(route.params.departmentId))
 const polyclinicName = ref('')
-const polyclinicId = ref(route.params.id)
+const polyclinicId = computed(() => Number(route.params.polyclinicId))
 
 
 
@@ -459,9 +463,16 @@ const confirmDeleteSector = async () => {
 }
 
 const goToSector = (sector) => {
-  const id = sector.sector_id || sector.SectorID || sector.id
+  const id = sector.sector_id
   if (!id) return
-  router.push({ name: 'SectorPage', params: { id } })
+  router.push({ 
+    name: 'SectorPage',
+    params: {
+      polyclinicId: polyclinicId.value,
+      departmentId: departmentId.value,
+      sectorId: id,
+    },
+   })
 }
 
 onMounted(() => {
@@ -477,7 +488,6 @@ onMounted(() => {
   padding: 24px;
 }
 
-/* верхняя полоса */
 .department-page__top {
   display: flex;
   align-items: center;
@@ -499,16 +509,22 @@ onMounted(() => {
   align-items: center;
   gap: 4px;
   font-size: 13px;
-  color: #6b7280;
+  color: #9ca3af;
 }
 
 .breadcrumbs__item {
+  cursor: pointer;
   text-decoration: none;
-  color: #6b7280;
+  color: #9ca3af;
 }
 
+.breadcrumbs__item--link {
+  cursor: pointer;
+}
+
+
 .breadcrumbs__item--current {
-  color: #111827;
+  color: #9ca3af;
   font-weight: 500;
 }
 
@@ -522,7 +538,6 @@ onMounted(() => {
   margin-bottom: 20px;
 }
 
-/* поиск + кнопка */
 .department-page__controls {
   display: flex;
   justify-content: space-between;
@@ -539,7 +554,7 @@ onMounted(() => {
 }
 
 .search-box__input {
-  flex: 1;
+  width: 500px;
 }
 
 .card {
@@ -559,8 +574,9 @@ onMounted(() => {
 
 .card__header-row {
   background: #edf3ff;
-  font-weight: 500;
-  font-size: 14px;
+  font-weight: 600;
+  font-size: 15px;
+  padding: 16px;
 }
 
 .card__row {
@@ -579,6 +595,11 @@ onMounted(() => {
   padding: 16px 20px;
   font-size: 14px;
   color: #6b7280;
+}
+.search-box__btn{
+  border:2px solid #2563eb;
+  color:#2563eb;
+
 }
 
 /* сетка для таблицы участков */
@@ -610,12 +631,9 @@ onMounted(() => {
 
 .col--name-link {
   cursor: pointer;
-  color: #2563eb;
 }
 
-.col--name-link:hover {
-  text-decoration: underline;
-}
+
 
 .col--count {
   justify-content: flex-start;
@@ -632,6 +650,10 @@ onMounted(() => {
   cursor: pointer;
   font-size: 16px;
   padding: 4px;
+}
+.icon-btn img{
+  width:20px;
+
 }
 
 .department-page__subtitle {

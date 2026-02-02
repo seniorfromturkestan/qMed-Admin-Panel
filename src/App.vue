@@ -38,9 +38,7 @@ button {
 }
 
 .app__container {
-  max-width: 1440px;
+  max-width: 1920px;
   margin: 0 auto;
 }
-
-
 </style>

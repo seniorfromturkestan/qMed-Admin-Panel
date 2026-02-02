@@ -2,36 +2,19 @@
   <header class="header">
     <div class="header__left">
       <div class="header__logo">
-        <span>qMed</span>
+        <img src="../assets/img/logo.png" alt="">
       </div>
       <span class="header__title">{{ headerTitle }}</span>
     </div>
 
     <div class="header__right">
-      <div class="header__lang">
-        <button
-          class="header__lang-btn"
-          :class="{ 'header__lang-btn--active': currentLang === 'ru' }"
-          @click="setLang('ru')"
-        >
-          RU
-        </button>
-        <button
-          class="header__lang-btn"
-          :class="{ 'header__lang-btn--active': currentLang === 'kz' }"
-          @click="setLang('kz')"
-        >
-          KZ
-        </button>
-      </div>
-
       <div class="header__profile">
-        <div class="header__profile-icon">
-          <span v-if="initials">{{ initials }}</span>
-        </div>
         <span class="header__profile-name">
           {{ userName }}
         </span>
+        <div class="header__profile-icon">
+          <img src="../assets/img/profile.png" alt="">
+        </div>
       </div>
     </div>
   </header>
@@ -53,51 +36,36 @@ const sectorTitle = ref('Участок')
 
 const headerTitle = computed(() => {
   if (route.name === 'PolyclinicPage') {
-    // если передаём название через query ?name=
     return route.query.name || polyclinicTitle.value || 'Поликлиника'
   } else if (route.name === 'DepartmentPage') {
-    // заголовок = имя отделения, подтянутое с бэка
     return departmentTitle.value || route.query.name || 'Отделение'
   } else if (route.name === 'SectorPage') {
-    // заголовок = участок (номер/адрес), подтянутый с бэка
     return sectorTitle.value || route.query.name || 'Участок'
   }
-  // дефолтный заголовок
   return 'Поликлиники'
 })
 
-// Текущий язык интерфейса (пока просто храним в localStorage)
 const currentLang = ref(localStorage.getItem('lang') || 'ru')
 
 const setLang = (lang) => {
   currentLang.value = lang
   localStorage.setItem('lang', lang)
-  // Здесь в будущем можно дернуть i18n.changeLanguage(lang)
 }
 
-// Имя/фамилия пользователя
 const userName = ref('')
 
-// Инициалы для круглой иконки
-const initials = computed(() => {
-  if (!userName.value) return ''
-  const parts = userName.value.split(' ').filter(Boolean)
-  if (parts.length === 0) return ''
-  if (parts.length === 1) return parts[0].charAt(0).toUpperCase()
-  return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase()
-})
 
-// Хелпер для обновления названий по маршруту
 const updateHeaderByRoute = async (toRoute = route) => {
   try {
     if (toRoute.name === 'DepartmentPage') {
-      const id = toRoute.params.id
+      const id = toRoute.params.departmentId
       if (!id) return
       const res = await DepartmentApi.getDepartment(id)
       const data = res?.data || res
-      departmentTitle.value = data?.name || 'Отделение'
+      const department = data?.department || data
+      departmentTitle.value = department?.name || 'Отделение'
     } else if (toRoute.name === 'SectorPage') {
-      const id = toRoute.params.id
+      const id = toRoute.params.sectorId
       if (!id) return
       const res = await SectorApi.getSectorById(id)
       const data = res?.data || res
@@ -122,7 +90,6 @@ onMounted(async () => {
     const res = await UsersApi.getUserById(userId)
     const data = res?.data || res
 
-    // Пробуем разные варианты кейсов/полей
     const lastName =
       data?.last_name ||
       data?.LastName ||
@@ -135,14 +102,12 @@ onMounted(async () => {
       data?.firstName ||
       ''
 
-    // Если хочешь строго только фамилию — используй lastName
     userName.value = lastName || [firstName, lastName].filter(Boolean).join(' ')
   } catch (e) {
     console.error('Ошибка при получении пользователя по id:', e)
   }
 })
 
-// Слежение за сменой маршрута для обновления заголовка
 watch(
   () => route.fullPath,
   () => {
@@ -154,92 +119,118 @@ watch(
 
 <style scoped>
 .header {
-  height: 64px;
-  padding: 0 24px;
+  height: 72px;
+  padding: 0 32px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.25);
-  color: #000000;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  position: relative;
 }
 
 .header__left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
 }
 
 .header__logo {
-  width: 36px;
-  height: 36px;
-  border-radius: 999px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: radial-gradient(circle at 30% 0, #1C59F8, #1C59F8);
-  font-weight: 700;
-  font-size: 10px;
-  color: #ffffff;
-  box-shadow: 0 4px 20px #1c5af890;
+  transition: transform 0.2s ease;
+}
+
+.header__logo:hover {
+  transform: scale(1.05);
+}
+
+.header__logo img {
+  height: 44px;
+  width: auto;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.06));
 }
 
 .header__title {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .header__right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
 }
 
 .header__lang {
   display: inline-flex;
-  border-radius: 999px;
-  padding: 2px;
-  background: #1C59F8;
+  border-radius: 12px;
+  padding: 4px;
+  background: linear-gradient(135deg, #1C59F8 0%, #3b82f6 100%);
+  box-shadow: 0 2px 8px rgba(28, 89, 248, 0.2);
 }
 
 .header__lang-btn {
   border: none;
   background: transparent;
   color: #ffffff;
-  padding: 4px 10px;
+  padding: 6px 14px;
   font-size: 14px;
-  border-radius: 999px;
+  font-weight: 500;
+  border-radius: 8px;
   cursor: pointer;
-  transition:
-    background 0.15s ease,
-    color 0.15s ease;
+  transition: all 0.2s ease;
+}
+
+.header__lang-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .header__lang-btn--active {
   background: #ffffff;
-  color: #000000;
+  color: #1C59F8;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .header__profile {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  padding: 4px 16px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
 }
+
+
+
+.header__profile-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #334155;
+}
+
+
 
 .header__profile-icon {
   width: 32px;
   height: 32px;
-  border-radius: 999px;
-  background: #1C59F8;
+  border-radius: 50%;
+  overflow: hidden;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 600;
-  color: #e5e7eb;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-.header__profile-name {
-  font-size: 14px;
-  color: #000000;
-}
+
+
+
 </style>

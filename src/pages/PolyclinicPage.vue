@@ -3,23 +3,24 @@
     <div class="polyclinic-detail__breadcrumbs">
       <RouterLink class="crumb" to="/main">Главная</RouterLink>
       <span class="crumb-sep">/</span>
-      <span class="crumb">
-       {{ polyclinicName }}
-      </span>
+      <RouterLink class="crumb" to="/main">
+        {{ polyclinicName }}
+      </RouterLink>
       <span class="crumb-sep">/</span>
     </div>
 
-    <!-- Верхняя панель: поиск + действия -->
     <div class="polyclinic-detail__top">
       <div class="polyclinic-detail__search">
         <UiInput
           v-model="searchQuery"
           placeholder="Поиск"
+          class="polyclinic-detail__input"
         />
         <UiButton
           type="button"
           variant="secondary"
           @click="onSearch"
+          class="polyclinic-detail__search-btn"
         >
           Искать
         </UiButton>
@@ -128,8 +129,6 @@
     <div class="polyclinic-detail__content">
       <!-- Отделения -->
       <div v-if="activeTab === 'departments'">
-        <h2 class="section-title">Отделения поликлиники</h2>
-
         <div v-if="loadingDepartments" class="section-empty">Загрузка...</div>
         <div v-else-if="!departments.length" class="section-empty">
           Отделения не найдены
@@ -160,16 +159,16 @@
               <button
                 type="button"
                 class="icon-btn"
-                @click="onEditDepartment(dept)"
+                @click.stop="onEditDepartment(dept)"
               >
-                ✏️
+                <img src="../assets/img/edit.png" alt="">
               </button>
               <button
                 type="button"
                 class="icon-btn"
-                @click="onDeleteDepartment(dept)"
+                @click.stop="onDeleteDepartment(dept)"
               >
-                🗑
+                <img src="../assets/img/delete.png" alt="">
               </button>
             </div>
           </div>
@@ -178,7 +177,6 @@
 
       <!-- Сотрудники -->
       <div v-else-if="activeTab === 'employees'">
-        <h2 class="section-title">Сотрудники поликлиники</h2>
 
         <div v-if="loadingEmployees" class="section-empty">Загрузка...</div>
         <div v-else-if="!employees.length" class="section-empty">
@@ -186,11 +184,13 @@
         </div>
         <div v-else class="section-table">
           <div class="section-table__header section-table__header--employees">
-            <div class="col col--name">Фамилия Имя</div>
+            <div class="col col--name">ФИО</div>
             <div class="col col--role">Роль</div>
             <div class="col col--dept">Отделение</div>
             <div class="col col--sector">Участок</div>
             <div class="col col--phone">Телефон</div>
+            <div class="col col--sector">Логин</div>
+            <div class="col col--sector">Пароль</div>
             <div class="col col--actions">Действия</div>
           </div>
           <div
@@ -213,20 +213,29 @@
             <div class="col col--phone">
               {{ emp.PhoneNumber || emp.phone_number || '' }}
             </div>
+            <div class="col col--sector">
+              {{ emp.username|| '' }}
+            </div>
+            <div class="col col--sector">
+              {{ emp.password || '' }}
+            </div>
+            
             <div class="col col--actions">
               <button
                 type="button"
                 class="icon-btn"
-                @click="onEditEmployee(emp)"
+                @click.stop="onEditEmployee(emp)"
               >
-                ✏️
+              <img src="../assets/img/edit.png" alt="">
+
               </button>
               <button
                 type="button"
                 class="icon-btn"
-                @click="onDeleteEmployee(emp)"
+                @click.stop="onDeleteEmployee(emp)"
               >
-                🗑
+                <img src="../assets/img/delete.png" alt="">
+
               </button>
             </div>
           </div>
@@ -235,8 +244,6 @@
 
       <!-- Пациенты -->
       <div v-else-if="activeTab === 'patients'">
-        <h2 class="section-title">Пациенты поликлиники</h2>
-
         <div v-if="loadingPatients" class="section-empty">Загрузка...</div>
         <div v-else-if="!patients.length" class="section-empty">
           Пациенты не найдены
@@ -270,16 +277,17 @@
                 <button
                     type="button"
                     class="icon-btn"
-                    @click="onEditPatient(p)"
+                    @click.stop="onEditPatient(p)"
                 >
-                    ✏️
+                    <img src="../assets/img/edit.png" alt="">
                 </button>
                 <button
                     type="button"
                     class="icon-btn"
-                    @click="onDeletePatient(p)"
+                    @click.stop="onDeletePatient(p)"
                 >
-                    🗑
+                    <img src="../assets/img/delete.png" alt="">
+
                 </button>
             </div>
           </div>
@@ -477,12 +485,16 @@
         </select>
       </label>
 
-      <label class="modal-form__field">
+      <label
+        v-if="showDepartmentSelect"
+        class="modal-form__field"
+      >
         <span>Отделение</span>
         <select
           v-model="employeeCreateForm.department_id"
           class="modal-select"
         >
+        <option value="">Выберите отделение</option>
           <option
             v-for="d in departments"
             :key="d.id || d.department_id"
@@ -493,13 +505,16 @@
         </select>
       </label>
 
-      <label class="modal-form__field">
+      <label
+        v-if="showSectorSelect"
+        class="modal-form__field"
+      >
         <span>Участки</span>
         <select
           v-model="employeeCreateForm.sector_ids"
           class="modal-select"
-          multiple
         >
+          <option value="">Выберите участок</option>
           <option
             v-for="s in departmentSectors"
             :key="s.sector_id || s.id"
@@ -618,12 +633,16 @@
       </select>
     </label>
 
-    <label class="modal-form__field">
+    <label
+      v-if="showDepartmentSelect"
+      class="modal-form__field"
+    >
       <span>Отделение</span>
       <select
         v-model="employeeCreateForm.department_id"
         class="modal-select"
       >
+      <option value="">Выберите отделение</option>
         <option
           v-for="d in departments"
           :key="d.id || d.department_id"
@@ -634,13 +653,16 @@
       </select>
     </label>
 
-    <label class="modal-form__field">
+    <label
+      v-if="showSectorSelect"
+      class="modal-form__field"
+    >
       <span>Участки</span>
       <select
         v-model="employeeCreateForm.sector_ids"
         class="modal-select"
-        multiple
       >
+        <option value="">Выберите участок</option>
         <option
           v-for="s in departmentSectors"
           :key="s.SectorID || s.sector_id || s.id"
@@ -734,7 +756,7 @@
       />
     </label>
     <label class="modal-form__field">
-      <span>ЖСН</span>
+      <span>ИИН</span>
       <UiInput
         v-model="patientEditForm.iin"
         type="text"
@@ -906,12 +928,21 @@ import UiModal from '../components/UI/UiModal.vue'
 import UiInput from '../components/UI/UiInput.vue'
 
 const route = useRoute()
-const polyclinicId = ref(route.params.id)
+const polyclinicId = ref(route.params.polyclinicId)
 const polyclinicName = ref('')
 
 
 const goToDepartment = (dept) => {
-  router.push({ name: 'DepartmentPage', params: { id: dept.department_id } })
+  const departmentId = dept.department_id || dept.id
+  if (!departmentId) return
+
+  router.push({
+    name: 'DepartmentPage',
+    params: {
+      polyclinicId: polyclinicId.value,
+      departmentId: departmentId,
+    },
+  })
 }
 
 const fetchPolyclinicInfo = async () => {
@@ -972,6 +1003,8 @@ const patientEditForm = ref({
   phone_number: '',
   birth_date: '',
   gender: 'male',
+  relative_phone_number: '',
+  language: '',
   address: '',
   mail: '',
   height_cm: null,
@@ -1003,7 +1036,8 @@ const employeeCreateForm = ref({
   birth_date: '',
   role_id: 3,
   department_id: null,
-  sector_ids: [],
+  // одно выбранное значение участка
+  sector_ids: '',
 })
 
 // загрузка пациентов из Excel (UI)
@@ -1046,6 +1080,35 @@ const rolesOptions = [
 
 // сектора выбранного отделения
 const departmentSectors = ref([])
+
+// Показывать ли селект "Отделение"
+const showDepartmentSelect = computed(() => {
+  const role = Number(employeeCreateForm.value.role_id)
+  // department_manager, sector_manager, med_staff
+  return role === 5 || role === 2 || role === 3
+})
+
+// Показывать ли селект "Участки"
+const showSectorSelect = computed(() => {
+  const role = Number(employeeCreateForm.value.role_id)
+  // только для sector_manager и med_staff
+  return role === 2 || role === 3
+})
+
+// При смене роли очищаем отделение/участки, если они больше не нужны
+watch(
+  () => employeeCreateForm.value.role_id,
+  () => {
+    const role = Number(employeeCreateForm.value.role_id)
+
+    if (!(role === 5 || role === 2 || role === 3)) {
+      employeeCreateForm.value.department_id = null
+      employeeCreateForm.value.sector_ids = ''
+    } else if (!(role === 2 || role === 3)) {
+      employeeCreateForm.value.sector_ids = ''
+    }
+  },
+)
 
 const fetchDepartmentSectors = async (departmentId) => {
   if (!departmentId) {
@@ -1248,7 +1311,7 @@ const openCreateEmployeeModal = async () => {
     birth_date: '',
     role_id: 3,
     department_id: defaultDeptId,
-    sector_ids: [],
+    sector_ids: '',
   }
 
   if (defaultDeptId) {
@@ -1283,8 +1346,11 @@ const saveCreatedEmployee = async () => {
         : null,
     }
 
-    if (employeeCreateForm.value.sector_ids && employeeCreateForm.value.sector_ids.length) {
-      payload.sector_ids = employeeCreateForm.value.sector_ids.map((id) => Number(id))
+    const sectorValue = employeeCreateForm.value.sector_ids
+    if (Array.isArray(sectorValue) && sectorValue.length) {
+      payload.sector_ids = sectorValue.map((id) => Number(id))
+    } else if (sectorValue) {
+      payload.sector_ids = [Number(sectorValue)]
     }
 
     await UsersApi.createEmployee(payload)
@@ -1418,7 +1484,7 @@ const getRoleName = (user) => {
   const map = {
     1: 'Менеджер',
     2: 'Врач',
-    3: 'Медсестра',
+    3: 'Мед. персонал',
     5: 'Зав. отделением',
   }
 
@@ -1455,6 +1521,8 @@ const onEditPatient = async (p) => {
       gender: data.gender || data.Gender || 'male',
       address: data.address || data.Address || '',
       mail: data.mail || data.Mail || '',
+      relative_phone_number: data.relative_phone_number || data.RelativePhoneNumber || '',
+      language: data.language || data.Language || '',
       height_cm: data.height_cm ?? data.HeightCM ?? null,
       weight_kg: data.weight_kg ?? data.WeightKG ?? null,
       blood_pressure: data.blood_pressure || data.BloodPressure || '',
@@ -1482,21 +1550,51 @@ const savePatient = async () => {
   if (!id) return
 
   try {
+    const existingDepartments =
+      editingPatient.value?.departments || editingPatient.value?.Departments || []
+    const existingSectors =
+      editingPatient.value?.sectors || editingPatient.value?.Sectors || []
+    const existingPolyclinics =
+      editingPatient.value?.polyclinics || editingPatient.value?.Polyclinics || []
+    const existingDiseases =
+      editingPatient.value?.diseases || editingPatient.value?.Diseases || []
+
     const payload = {
-      last_name: patientEditForm.value.last_name,
-      first_name: patientEditForm.value.first_name,
-      middle_name: patientEditForm.value.middle_name,
-      iin: patientEditForm.value.iin,
-      phone_number: patientEditForm.value.phone_number,
-      birth_date: patientEditForm.value.birth_date,
-      gender: patientEditForm.value.gender,
-      address: patientEditForm.value.address,
-      mail: patientEditForm.value.mail,
-      height_cm: patientEditForm.value.height_cm,
-      weight_kg: patientEditForm.value.weight_kg,
-      blood_pressure: patientEditForm.value.blood_pressure,
-      sugar_level: patientEditForm.value.sugar_level,
-      heart_rate: patientEditForm.value.heart_rate,
+      address: patientEditForm.value.address || '',
+      birth_dt: patientEditForm.value.birth_date || '',
+      department_ids: Array.isArray(existingDepartments)
+        ? existingDepartments
+            .map((d) => Number(d.department_id || d.DepartmentID || d.id))
+            .filter((n) => Number.isFinite(n))
+        : [],
+      disease_ids: Array.isArray(existingDiseases)
+        ? existingDiseases
+            .map((d) => Number(d.disease_id || d.DiseaseID || d.id))
+            .filter((n) => Number.isFinite(n))
+        : [],
+      first_name: patientEditForm.value.first_name || '',
+      gender: patientEditForm.value.gender || '',
+      iin: patientEditForm.value.iin || '',
+      language: patientEditForm.value.language || '',
+      last_name: patientEditForm.value.last_name || '',
+      mail: patientEditForm.value.mail || '',
+      med_staff_id: Number(
+        editingPatient.value?.med_staff_id || editingPatient.value?.MedStaffID || 0,
+      ),
+      middle_name: patientEditForm.value.middle_name || '',
+      phone_number: patientEditForm.value.phone_number || '',
+      polyclinic_ids: Array.isArray(existingPolyclinics) && existingPolyclinics.length
+        ? existingPolyclinics
+            .map((p) => Number(p.polyclinic_id || p.PolyclinicID || p.id))
+            .filter((n) => Number.isFinite(n))
+        : (polyclinicId.value ? [Number(polyclinicId.value)] : []),
+      relative_phone_number: patientEditForm.value.relative_phone_number || '',
+      roles: [4],
+      sector_ids: Array.isArray(existingSectors)
+        ? existingSectors
+            .map((s) => Number(s.sector_id || s.SectorID || s.id))
+            .filter((n) => Number.isFinite(n))
+        : [],
     }
 
     await UsersApi.updateUser(id, payload)
@@ -1535,7 +1633,7 @@ const onEditEmployee = (emp) => {
     birth_date: emp.birth_date || emp.BirthDate || '',
     role_id: roleId,
     department_id: deptId,
-    sector_ids: sectorIds,
+    sector_ids: sectorIds[0] || '',
   }
 
   if (deptId) {
@@ -1559,7 +1657,7 @@ const closeEditEmployeeModal = () => {
     birth_date: '',
     role_id: 3,
     department_id: null,
-    sector_ids: [],
+    sector_ids: '',
   }
 }
 
@@ -1572,28 +1670,35 @@ const saveEmployee = async () => {
   if (!id) return
 
   try {
+    const roleId = Number(employeeCreateForm.value.role_id)
+
     const payload = {
-      first_name: employeeCreateForm.value.first_name,
-      last_name: employeeCreateForm.value.last_name,
-      middle_name: employeeCreateForm.value.middle_name,
-      phone_number: employeeCreateForm.value.phone_number,
-      gender: employeeCreateForm.value.gender,
-      address: employeeCreateForm.value.address,
-      mail: employeeCreateForm.value.mail,
-      birth_date: employeeCreateForm.value.birth_date,
-      role_id: Number(employeeCreateForm.value.role_id),
-      department_id: employeeCreateForm.value.department_id
-        ? Number(employeeCreateForm.value.department_id)
-        : null,
+      address: employeeCreateForm.value.address || '',
+      birth_dt: employeeCreateForm.value.birth_date || '',
+      department_ids: employeeCreateForm.value.department_id
+        ? [Number(employeeCreateForm.value.department_id)]
+        : [],
+      disease_ids: [],
+      first_name: employeeCreateForm.value.first_name || '',
+      gender: employeeCreateForm.value.gender || '',
+      iin: '',
+      language: employeeCreateForm.value.language || '',
+      last_name: employeeCreateForm.value.last_name || '',
+      mail: employeeCreateForm.value.mail || '',
+      med_staff_id: 0,
+      middle_name: employeeCreateForm.value.middle_name || '',
+      phone_number: employeeCreateForm.value.phone_number || '',
+      polyclinic_ids: polyclinicId.value ? [Number(polyclinicId.value)] : [],
+      relative_phone_number: '',
+      roles: [roleId],
+      sector_ids: [],
     }
 
-    if (
-      employeeCreateForm.value.sector_ids &&
-      employeeCreateForm.value.sector_ids.length
-    ) {
-      payload.sector_ids = employeeCreateForm.value.sector_ids.map((val) =>
-        Number(val),
-      )
+    const sectorValue = employeeCreateForm.value.sector_ids
+    if (Array.isArray(sectorValue) && sectorValue.length) {
+      payload.sector_ids = sectorValue.map((val) => Number(val))
+    } else if (sectorValue) {
+      payload.sector_ids = [Number(sectorValue)]
     }
 
     await UsersApi.updateUser(id, payload)
@@ -1660,7 +1765,7 @@ onMounted(() => {
 
 // если id в роуте поменяется — обновим данные
 watch(
-  () => route.params.id,
+  () => route.params.polyclinicId,
   (newId) => {
     polyclinicId.value = newId
     departments.value = []
@@ -1693,10 +1798,16 @@ watch(
   align-items: center;
   gap: 4px;
   font-size: 13px;
-  color: #6b7280;
+  color: #9ca3af;
   margin-bottom: 12px;
 }
 
+.crumb{
+  color: #9ca3af;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
 .crumb-sep {
   color: #9ca3af;
 }
@@ -1714,7 +1825,6 @@ watch(
   background: #ffffff;
   border-radius: 16px;
   border: 1px solid #e5e7eb;
-  padding: 16px 20px 20px;
 }
 
 .section-title {
@@ -1723,17 +1833,15 @@ watch(
   margin-bottom: 12px;
 }
 
-/* Таблички */
-.section-table {
-  margin-top: 4px;
-}
+
 
 .section-table__header {
   display: grid;
   grid-template-columns: 3fr 2fr;
-  padding: 10px 12px;
+  border-radius: 15px 15px 0 0;
+  padding:16px;
   background: #eef4ff;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: #111827;
 }
@@ -1744,6 +1852,12 @@ watch(
   padding: 10px 12px;
   font-size: 14px;
   border-top: 1px solid #f3f4f6;
+  margin-left: 10px;
+  cursor: pointer;
+}
+.section-table__row:hover {
+  background: #f9fafb;
+  
 }
 
 .col {
@@ -1769,7 +1883,7 @@ watch(
 .section-table__header--employees,
 .section-table__row--employees {
   display: grid;
-  grid-template-columns: 2.4fr 1.4fr 2fr 2fr 2fr 1.4fr;
+  grid-template-columns: 2.4fr 1.4fr 2fr 2fr 2fr 1.4fr 2fr 2fr;
   column-gap: 8px;
 }
 
@@ -1796,9 +1910,14 @@ watch(
   gap: 4px;
 }
 
+.polyclinic-detail__input {
+  width: 700px;
+}
+
+
 .icon-btn {
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   border-radius: 999px;
   border: none;
   background: transparent;
@@ -1813,6 +1932,9 @@ watch(
 
 .icon-btn:hover {
   background: rgba(37, 99, 235, 0.08);
+}
+.icon-btn img {
+  width: 20px;
 }
 
 /* модалки для сотрудников (повторяем стили из Main.vue) */
@@ -1889,8 +2011,13 @@ watch(
   align-items: center;
   gap: 8px;
   flex: 1 1 auto;
-  max-width: 480px;
+ 
 }
+.polyclinic-detail__search-btn {
+  border:2px solid #2563eb;
+  color:#2563eb;
+}
+
 .polyclinic-detail__select {
   border-radius: 999px;
   border: 1px solid #e5e7eb;
@@ -1933,8 +2060,6 @@ watch(
   font-size: 14px;
   background: #ffffff;
 }
-</style>
-<style scoped>
 .polyclinic-detail__error {
   font-size: 12px;
   color: #ef4444;
